@@ -1,20 +1,19 @@
 package db1.project.product.dto;
 
-import com.sun.istack.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductDTO {
     private Long id;
 
-    @NotNull
     private String name;
 
-    @NotNull
     private float price;
 
-    @NotNull
     private int inventory;
 
-    @NotNull
     private String description;
 
     public Long getId() {

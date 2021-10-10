@@ -1,9 +1,12 @@
 package db1.project.product.model;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+@Entity
 public class Product {
+
     @Id
     @GeneratedValue
     private Long id;
@@ -12,7 +15,7 @@ public class Product {
 
     private float price;
 
-    private int inventory;
+    private Integer inventory;
 
     private String description;
 
