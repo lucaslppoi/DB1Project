@@ -21,7 +21,7 @@ public class ProductService {
         this.productTranslator = productTranslator;
     }
 
-    @Transactional//service
+    @Transactional
     public ProductDTO createProduct (ProductDTO productDTO){
         Product product = productTranslator.productDTOToProduct(productDTO);
         Product savedProduct = productRepository.save(product);
@@ -31,7 +31,8 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductDTO findById (Long id){
         return productRepository.findById(id)
-                .map(product -> productTranslator.productToProductDTO(product)).orElse(null);
+                .map(product -> productTranslator.productToProductDTO(product))
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
@@ -40,6 +41,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void update (Long id, ProductDTO productDTO){
         productRepository.findById(id).map(product -> {
             product.setPrice(productDTO.getPrice());
@@ -51,6 +53,7 @@ public class ProductService {
         });
     }
 
+    @Transactional
     public ProductDTO increment (Long id, int amount){
         return productRepository.findById(id).map(product -> {
             product.setInventory(product.getInventory()+amount);
@@ -59,6 +62,7 @@ public class ProductService {
         }).orElse(null);
     }
 
+    @Transactional
     public void delete(Long id){
         productRepository.deleteById(id);
     }

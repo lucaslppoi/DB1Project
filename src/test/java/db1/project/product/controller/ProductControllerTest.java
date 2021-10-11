@@ -1,32 +1,23 @@
 package db1.project.product.controller;
 
+import db1.project.product.service.ProductService;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProductControllerTest {
 
-    @Test
-    void createProduct() {
-    }
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Test
-    void findById() {
-    }
+    @Mock
+    private ProductService productService;
 
-    @Test
-    void findAll() {
-    }
+    @InjectMocks
+    private ProductController productController;
 
-    @Test
-    void update() {
-    }
-
-    @Test
-    void increment() {
-    }
-
-    @Test
-    void delete() {
-    }
 }

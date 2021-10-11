@@ -1,32 +1,27 @@
 package db1.project.product.service;
 
+import db1.project.product.dto.ProductDTO;
+import db1.project.product.model.Product;
+import db1.project.product.repository.ProductRepository;
+import db1.project.product.translator.ProductTranslator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 class ProductServiceTest {
 
-    @Test
-    void createProduct() {
-    }
+    @InjectMocks
+    private ProductService productService;
 
-    @Test
-    void findById() {
-    }
+    @Mock
+    private ProductTranslator productTranslator;
 
-    @Test
-    void findAll() {
-    }
-
-    @Test
-    void update() {
-    }
-
-    @Test
-    void increment() {
-    }
-
-    @Test
-    void delete() {
-    }
+    @Mock
+    private ProductRepository productRepository;
 }
