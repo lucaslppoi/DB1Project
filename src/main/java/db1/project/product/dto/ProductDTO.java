@@ -16,6 +16,9 @@ public class ProductDTO {
 
     private String description;
 
+    public ProductDTO() {
+    }
+
     public Long getId() {
         return id;
     }

@@ -42,15 +42,15 @@ public class ProductService {
     }
 
     @Transactional
-    public void update (Long id, ProductDTO productDTO){
-        productRepository.findById(id).map(product -> {
+    public ProductDTO update (Long id, ProductDTO productDTO){
+        return productRepository.findById(id).map(product -> {
             product.setPrice(productDTO.getPrice());
             product.setDescription(productDTO.getDescription());
             product.setInventory(productDTO.getInventory());
             product.setName(productDTO.getName());
-            productRepository.save(product);
-            return null;
-        });
+            Product savedProduct = productRepository.save(product);
+            return productTranslator.productToProductDTO(savedProduct);
+        }).orElse(null);
     }
 
     @Transactional
