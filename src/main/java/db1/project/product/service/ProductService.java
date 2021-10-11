@@ -4,11 +4,8 @@ import db1.project.product.dto.ProductDTO;
 import db1.project.product.model.Product;
 import db1.project.product.repository.ProductRepository;
 import db1.project.product.translator.ProductTranslator;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.stream.Collectors;
