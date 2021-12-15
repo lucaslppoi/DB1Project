@@ -35,11 +35,11 @@ public class ProductController {
     }
 
     @GetMapping("/listall")
-    public ResponseEntity<?> findAll () {
-        List<?> prod = productService.findAll();
+    public ResponseEntity<List> findAll () {
+        List<ProductDTO> prod = productService.findAll();
 
         if (prod.isEmpty()) {
-            return new ResponseEntity<>("Não há produtos cadastrados", HttpStatus.NOT_FOUND);
+            return new ResponseEntity("Não há produtos cadastrados", HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok().body(prod);
     }

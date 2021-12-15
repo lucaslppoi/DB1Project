@@ -14,30 +14,29 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final ProductTranslator productTranslator;
 
-    public ProductService(ProductRepository productRepository, ProductTranslator productTranslator) {
+    public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.productTranslator = productTranslator;
     }
 
     @Transactional
     public ProductDTO createProduct (ProductDTO productDTO){
-        Product product = productTranslator.productDTOToProduct(productDTO);
+        Product product = ProductTranslator.productDTOToProduct(productDTO);
         Product savedProduct = productRepository.save(product);
-        return productTranslator.productToProductDTO(savedProduct);
+        return ProductTranslator.productToProductDTO(savedProduct);
     }
 
     @Transactional(readOnly = true)
     public ProductDTO findById (Long id){
         return productRepository.findById(id)
-                .map(product -> productTranslator.productToProductDTO(product))
+                .map(ProductTranslator::productToProductDTO)
                 .orElse(null);
     }
 
+
     @Transactional(readOnly = true)
     public List<ProductDTO> findAll() {
-        return productRepository.findAll().stream().map(product -> productTranslator.productToProductDTO(product))
+        return productRepository.findAll().stream().map(ProductTranslator::productToProductDTO)
                 .collect(Collectors.toList());
     }
 
@@ -49,7 +48,7 @@ public class ProductService {
             product.setInventory(productDTO.getInventory());
             product.setName(productDTO.getName());
             Product savedProduct = productRepository.save(product);
-            return productTranslator.productToProductDTO(savedProduct);
+            return ProductTranslator.productToProductDTO(savedProduct);
         }).orElse(null);
     }
 
@@ -58,7 +57,7 @@ public class ProductService {
         return productRepository.findById(id).map(product -> {
             product.setInventory(product.getInventory()+amount);
             Product save = productRepository.save(product);
-            return productTranslator.productToProductDTO(save);
+            return ProductTranslator.productToProductDTO(save);
         }).orElse(null);
     }
 

@@ -4,80 +4,116 @@ import db1.project.product.dto.ProductDTO;
 import db1.project.product.model.Product;
 import db1.project.product.repository.ProductRepository;
 import db1.project.product.translator.ProductTranslator;
-import org.assertj.core.api.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.security.RunAs;
 import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ProductServiceTest {
 
-    @Spy
+    @Mock
+    private ProductRepository repository;
+
+    @Captor
+    private ArgumentCaptor<Product> captor;
+
+    @Captor
+    private ArgumentCaptor<ProductDTO> captorDTO;
+
     @InjectMocks
-    private ProductService productService;
-
-    @Mock
-    private ProductTranslator productTranslator;
-
-    @Mock
-    private ProductRepository productRepository;
+    private ProductService service;
 
     @BeforeEach
-    public void init(){
-        MockitoAnnotations.openMocks(this);
+    public void setup(){
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    void validateCreatingNewProduct(){
-        ProductDTO expectedProductDTO = new ProductDTO();
+    public void should_create_a_product(){
+        ProductDTO productDTO = productDTOBuilder();
+//        Product product = mock(Product.class);
+        Product product = ProductTranslator.productDTOToProduct(productDTO);
 
-        Product expectedProduct = new Product();
+        when(repository.save(any(Product.class))).thenReturn(product);
 
-        when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
-        when(productService.createProduct(any(ProductDTO.class))).thenReturn(expectedProductDTO);
+        service.createProduct(productDTO);
 
-        ProductDTO productDTO = productService.createProduct(expectedProductDTO);
-
-        Assertions.assertEquals(expectedProductDTO.getId(), productDTO.getId());
+        verify(repository).save(ProductTranslator.productDTOToProduct(productDTO));
     }
 
     @Test
-    void validateFindById () {
-        ProductDTO expectedProductDTO = new ProductDTO();
+    public void should_find_by_id(){
+        ProductDTO productDTO = productDTOBuilder();
 
-        Product expectedProduct = new Product();
+        service.findById(productDTO.getId());
 
-        when(productRepository.findById(expectedProductDTO.getId())).thenReturn(Optional.of(expectedProduct));
-
-        assertThat(productService.findById(expectedProductDTO.getId())).isEqualTo(expectedProduct.getId());
+        verify(repository).findById(productDTO.getId());
+        assertNotNull(repository.findById(productDTO.getId()));
     }
 
     @Test
-    void validadeUpdate(){
-        ProductDTO expectedProductDTO = new ProductDTO();
+    public void should_not_find_by_id(){
+        service.findById(productDTOBuilder().getId());
 
-        Product expectedProduct = new Product();
-
-        when(productRepository.save(any(Product.class))).thenReturn(expectedProduct);
-        when(productService.update(expectedProductDTO.getId(), expectedProductDTO)).thenThrow(new RuntimeException("Test Exception"));
-
-        Assertions.assertNotEquals(productTranslator.productToProductDTO(expectedProduct), expectedProductDTO);
+        verify(repository).findById(1L);
+        assertNull(service.findById(1L));
     }
 
     @Test
-    void validateIncrement(){
-        ProductDTO expectedProductDTO = new ProductDTO();
-        expectedProductDTO.setInventory(10);
-        int incrementValue = 50;
-        expectedProductDTO.setInventory(expectedProductDTO.getInventory() + incrementValue);
+    public void should_update_product(){
+        ProductDTO productDTO = productDTOBuilder();
+        Product prod = mock(Product.class);
 
-        Assertions.assertEquals(60, expectedProductDTO.getInventory());
+        when(repository.findById(2L)).thenReturn(Optional.ofNullable(prod));
+
+        service.update(2L, productDTO);
+
+        //capturar o retorno e verificar se é igual ao builder
+    }
+
+    @Test
+    public void should_increment(){
+        ProductDTO productDTO = productDTOBuilder();
+
+        Product abc = ProductTranslator.productDTOToProduct(productDTO);
+//
+        when(repository.findById(1L)).thenReturn(Optional.of(abc));
+
+        int amount = 100;
+
+        Product dce = new Product();
+
+        dce.setInventory(abc.getInventory() + amount);
+
+        when(repository.save(abc)).thenReturn(dce);
+
+        ProductDTO prod = service.increment(productDTO.getId(), amount);
+
+        assertEquals(150, prod.getInventory());
+    }
+
+    private ProductDTO productDTOBuilder(){
+        ProductDTO prod = new ProductDTO();
+
+        prod.setPrice(3000L);
+        prod.setName("bbbb");
+        prod.setDescription("aaa");
+        prod.setInventory(50);
+        prod.setId(1L);
+
+        return prod;
     }
 }
