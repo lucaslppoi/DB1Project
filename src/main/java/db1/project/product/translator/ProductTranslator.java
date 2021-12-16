@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductTranslator {
 
-    public static Product productDTOToProduct(ProductDTO productDTO){
+    public Product productDTOToProduct(ProductDTO productDTO){
         Product product = new Product();
         product.setId(productDTO.getId());
         product.setDescription(productDTO.getDescription());
@@ -17,7 +17,7 @@ public class ProductTranslator {
         return product;
     }
 
-    public static ProductDTO productToProductDTO (Product product){
+    public ProductDTO productToProductDTO (Product product){
         ProductDTO productDTO = new ProductDTO();
         productDTO.setId(product.getId());
         productDTO.setDescription(product.getDescription());
