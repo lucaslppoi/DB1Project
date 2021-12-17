@@ -17,6 +17,17 @@ public class ProductDTO {
 
     private String description;
 
+    public ProductDTO() {
+    }
+
+    public ProductDTO(Long id, String name, float price, int inventory, String description) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.inventory = inventory;
+        this.description = description;
+    }
+
     public Long getId() {
         return id;
     }
@@ -65,5 +76,6 @@ public class ProductDTO {
         productDTO.setPrice(product.getPrice());
         productDTO.setName(product.getName());
         return productDTO;
+
     }
 }
