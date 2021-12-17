@@ -1,5 +1,7 @@
 package db1.project.product.model;
 
+import db1.project.product.dto.ProductDTO;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -57,5 +59,15 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public static Product productDTOToProduct(ProductDTO productDTO){
+        Product product = new Product();
+        product.setId(productDTO.getId());
+        product.setDescription(productDTO.getDescription());
+        product.setInventory(productDTO.getInventory());
+        product.setPrice(productDTO.getPrice());
+        product.setName(productDTO.getName());
+        return product;
     }
 }

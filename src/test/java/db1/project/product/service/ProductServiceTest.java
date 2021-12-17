@@ -3,7 +3,6 @@ package db1.project.product.service;
 import db1.project.product.dto.ProductDTO;
 import db1.project.product.model.Product;
 import db1.project.product.repository.ProductRepository;
-import db1.project.product.translator.ProductTranslator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -17,9 +16,6 @@ class ProductServiceTest {
 
     @Mock
     private ProductRepository repository;
-
-    @Mock
-    private ProductTranslator translator;
 
     @InjectMocks
     private ProductService service;
@@ -35,15 +31,13 @@ class ProductServiceTest {
 
         Product product = mock(Product.class);
 
-        when(translator.productDTOToProduct(productDTO)).thenReturn(product);
+        when(Product.productDTOToProduct(productDTO)).thenReturn(product);
 
         when(repository.save(any(Product.class))).thenReturn(product);
 
         service.createProduct(productDTO);
 
         verify(repository).save(product);
-        verify(translator).productDTOToProduct(productDTO);
-        verify(translator).productToProductDTO(product);
     }
 
     @Test
@@ -92,25 +86,19 @@ class ProductServiceTest {
     public void should_increment_inventory(){
         ProductDTO productDTO = productDTOBuilder();
 
-        when(translator.productDTOToProduct(productDTO)).thenCallRealMethod();
+        Product tranlatedDTO = Product.productDTOToProduct(productDTO);
 
-        Product DTOTranslated = translator.productDTOToProduct(productDTO);
-
-        when(repository.findById(1L)).thenReturn(Optional.of(DTOTranslated));
+        when(repository.findById(1L)).thenReturn(Optional.of(tranlatedDTO));
 
         int amount = 100;
 
-        Product productToBeIncremented = new Product();
+        tranlatedDTO.setInventory(tranlatedDTO.getInventory() + amount);
 
-        productToBeIncremented.setInventory(DTOTranslated.getInventory() + amount);
-
-        when(repository.save(DTOTranslated)).thenReturn(productToBeIncremented);
-
-        when(service.increment(productDTO.getId(), amount)).thenCallRealMethod();
+        when(repository.save(tranlatedDTO)).thenReturn(tranlatedDTO);
 
         ProductDTO toBeCompared = service.increment(productDTO.getId(), amount);
 
-        assertEquals(150, toBeCompared.getInventory());
+        assertEquals(250, toBeCompared.getInventory());
     }
 
     @Test

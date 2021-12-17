@@ -2,101 +2,164 @@ package db1.project.product.controller;
 
 import db1.project.product.dto.ProductDTO;
 import db1.project.product.service.ProductService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
+import javax.persistence.EntityManager;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+//@ExtendWith(SpringExtension.class)
+@SpringBootApplication
+@AutoConfigureMockMvc
+@WebMvcTest(ProductController.class)
 class ProductControllerTest {
 
-    @Mock
-    private ProductDTO productDTO;
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Mock
     private ProductService service;
 
-    @Mock
-    private ResponseEntity entity;
-
-    @InjectMocks
-    private ProductController controller;
-
-    @BeforeEach
-    public void setup(){
-        MockitoAnnotations.initMocks(this);
-    }
-
-
     @Test
-    void createProduct() {
-        controller.createProduct(productDTO);
+    void createProduct() throws Exception {
+        ProductDTO productDTO = productDTOBuilder();
+        entityManager.persist(productDTO);
+        entityManager.flush();
 
-        verify(service).createProduct(productDTO);
+        when(service.createProduct(productDTO)).thenReturn(productDTO);
+
+        mockMvc.perform(post("/product/create"))
+//                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect((ResultMatcher) jsonPath("$[0].name", is("Celular")));
     }
 
     @Test
-    void findById() {
+    void findById() throws Exception {
+        ProductDTO productDTO = productDTOBuilder();
+        entityManager.persist(productDTO);
+        entityManager.flush();
+
         when(service.findById(1L)).thenReturn(productDTO);
 
-        ResponseEntity<?> result = controller.findById(1L);
-
-//        assertEquals(productDTO, result);
+        mockMvc.perform(get("/search/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect((ResultMatcher) jsonPath("$[0].name", is("Celular")));
     }
 
     @Test
-    void notfindById() {
+    void notfindById() throws Exception {
         when(service.findById(1L)).thenReturn(null);
 
-        ResponseEntity<?> result = controller.findById(1L);
-
-        assertEquals("Produto não encontrado", result.getBody());
+        mockMvc.perform(get("/search/1"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void findAll() {
+    void findAll() throws Exception {
         List<ProductDTO> list = mock(List.class);
-        ProductDTO productDTO2 = mock(ProductDTO.class);
-
-        when(productDTO.getId()).thenReturn(1L);
-        when(productDTO2.getId()).thenReturn(2L);
-
-        list.add(0, productDTO);
-        list.add(1, productDTO2);
 
         when(service.findAll()).thenReturn(list);
 
-        ResponseEntity<List> test = controller.findAll();
+        ProductDTO productDTO = productDTOBuilder();
+        ProductDTO productDTO1 = productDTOBuilder();
+        productDTO1.setName("Computador");
 
-        assertNotNull(test);
+        list.add(0, productDTO);
+        list.add(1, productDTO1);
+
+        entityManager.persist(list);
+        entityManager.flush();
+
+        mockMvc.perform(get("/product/listall"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect((ResultMatcher) jsonPath("$[0].name", is("Celular")))
+                .andExpect((ResultMatcher) jsonPath("$[1].name", is("Computador")));
     }
 
     @Test
-    void update() {
-        controller.update(1L, productDTO);
+    void notFindAll() throws Exception {
+        List<ProductDTO> emptyList = Collections.<ProductDTO>emptyList();
 
-        verify(service).update(1L, productDTO);
+        when(service.findAll()).thenReturn(emptyList);
+
+        mockMvc.perform(get("/listall"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void increment() {
-        controller.increment(1L, 100);
+    void update() throws Exception {
+        ProductDTO productDTO = productDTOBuilder();
+        ProductDTO productDTO1 = productDTOBuilder();
+        productDTO1.setName("Computador");
 
-        verify(service).increment(1L, 100);
+        entityManager.persist(productDTO);
+        entityManager.persist(productDTO1);
+        entityManager.flush();
+
+        when(service.update(1L, productDTO)).thenReturn(productDTO1);
+
+        mockMvc.perform(get("/update/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect((ResultMatcher) jsonPath("$[0].name", is("Computador")));
     }
 
     @Test
-    void delete() {
-        controller.delete(1L);
+    void increment() throws Exception {
+        ProductDTO productDTO = productDTOBuilder();
+        productDTO.setPrice(productDTO.getPrice() + 100);
 
-        verify(service).delete(1L);
+        entityManager.persist(productDTO);
+        entityManager.flush();
+
+        when(service.increment(1L, 100)).thenReturn(productDTO);
+
+        mockMvc.perform(get("/inventory/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect((ResultMatcher) jsonPath("$[0].price", is(3100L)));
+    }
+
+    @Test
+    void delete() throws Exception {
+        ProductDTO productDTO = productDTOBuilder();
+        entityManager.persist(productDTO);
+        entityManager.flush();
+
+        mockMvc.perform(get("/delete/1"))
+                .andExpect(status().isOk());
+    }
+
+    private ProductDTO productDTOBuilder(){
+        ProductDTO prod = new ProductDTO();
+
+        prod.setPrice(3000L);
+        prod.setName("Celular");
+        prod.setDescription("128gb");
+        prod.setInventory(50);
+        prod.setId(1L);
+
+        return prod;
     }
 }
