@@ -21,6 +21,7 @@ public class ProductController {
 
     @PostMapping("/create")
     public ProductDTO createProduct (@RequestBody ProductDTO productDTO) {
+        System.out.println("123");
         return productService.createProduct(productDTO);
     }
 
