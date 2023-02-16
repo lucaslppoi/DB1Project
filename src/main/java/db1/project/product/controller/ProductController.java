@@ -38,6 +38,7 @@ public class ProductController {
     @GetMapping("/listall")
     public ResponseEntity<List> findAll () {
         List<ProductDTO> prod = productService.findAll();
+        System.out.println("4321");
 
         if (prod.isEmpty()) {
             return new ResponseEntity("Não há produtos cadastrados", HttpStatus.NOT_FOUND);
